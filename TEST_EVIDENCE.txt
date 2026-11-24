@@ -1,0 +1,65 @@
+LOCAL STUDENT VERIFICATION — WINDOWS POWERSHELL, 2026-11-24
+Command: uv run --no-project python -m unittest discover -s tests -v
+
+test_cleaning (test_budget.BudgetTests.test_cleaning) ... ok
+test_cli_end_to_end_and_undo (test_budget.BudgetTests.test_cli_end_to_end_and_undo) ... ok
+test_duplicate_id_and_bad_header (test_budget.BudgetTests.test_duplicate_id_and_bad_header) ... ok
+test_failed_save_preserves_previous_file (test_budget.BudgetTests.test_failed_save_preserves_previous_file) ... ok
+test_filter_and_separate_currencies (test_budget.BudgetTests.test_filter_and_separate_currencies) ... ok
+test_invalid_amounts (test_budget.BudgetTests.test_invalid_amounts) ... ok
+test_invalid_date_and_currency (test_budget.BudgetTests.test_invalid_date_and_currency) ... ok
+test_invalid_import_reports_row (test_budget.BudgetTests.test_invalid_import_reports_row) ... ok
+test_normal_balance (test_budget.BudgetTests.test_normal_balance) ... ok
+test_persistence_round_trip_and_backup (test_budget.BudgetTests.test_persistence_round_trip_and_backup) ... ok
+test_unknown_category_and_kind (test_budget.BudgetTests.test_unknown_category_and_kind) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 2.146s
+
+OK
+
+
+MANUAL VERIFICATION — same environment and date
+Commands and output supplied by the student; prompts omitted.
+
+> uv run --no-project budget.py add 2000 --kind income --category salary
+Added T001: income 2000.00 EUR (salary)
+> uv run --no-project budget.py add 18.50 --category food
+Added T002: expense 18.50 EUR (food)
+> uv run --no-project budget.py add 35 --category transport
+Added T003: expense 35.00 EUR (transport)
+> uv run --no-project budget.py list
+ID       Date         Kind      Category                Amount  Currency
+T001     2026-11-24   income    salary                 2000.00  EUR
+T002     2026-11-24   expense   food                     18.50  EUR
+T003     2026-11-24   expense   transport                35.00  EUR
+> uv run --no-project budget.py summary
+Currency: EUR
+Income:   2000.00
+Expenses: 53.50
+Balance:  1946.50
+Expenses by category:
+  food: 18.50
+  transport: 35.00
+> uv run --no-project budget.py add -10 --category food
+Error: amount must be > 0 and finite.
+> uv run --no-project budget.py add 20 --category unknown
+Error: unknown expense category 'unknown'; choose food, housing, transport, utilities, health, education, entertainment, other.
+> Get-Content data/transactions.csv
+id,date,kind,category,amount,currency
+T001,2026-11-24,income,salary,2000.00,EUR
+T002,2026-11-24,expense,food,18.50,EUR
+T003,2026-11-24,expense,transport,35.00,EUR
+> uv run --no-project budget.py undo
+Undid T003.
+> uv run --no-project budget.py summary
+Currency: EUR
+Income:   2000.00
+Expenses: 18.50
+Balance:  1981.50
+Expenses by category:
+  food: 18.50
+
+Expected vs actual: all 11 automated tests passed; the initial balance was
+1946.50 EUR, both invalid entries were rejected and absent from the CSV, and
+the balance after persistent undo was 1981.50 EUR. All matched expectations.
